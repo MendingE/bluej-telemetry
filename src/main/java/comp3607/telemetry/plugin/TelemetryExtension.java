@@ -1,5 +1,5 @@
+package comp3607.telemetry.plugin;
 
-package comp3607.telemetry.extension;
 
 import bluej.extensions2.BlueJ;
 import bluej.extensions2.Extension;
