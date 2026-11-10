@@ -80,16 +80,17 @@ This compiles the project and runs the available automated tests.
 src/
 ├── main/
 │   ├── java/comp3607/telemetry/
-│   │   ├── extension/
-│   │   ├── collector/
-│   │   ├── model/
-│   │   ├── factory/
-│   │   ├── analytics/
-│   │   ├── exporter/
+│   │   ├── dataCollection/
+│   │   ├── events/
+│   │   ├── export/
+│   │   ├── patterns/
+│   │   ├── plugin/
 │   │   └── reporting/
+│   │ 
 │   └── resources/
 └── test/
-    └── java/comp3607/telemetry/
+    └── java/comp3607/telemetry/unitTests
+        
 ```
 
 ## Team Development
