@@ -101,6 +101,6 @@ Changes should be pushed to GitHub and merged into `main` through pull requests.
 
 ## Design Patterns
 
-The project will incorporate at least three design patterns, excluding Singleton.
+The project will incorporate the Observer, Strategy and Adapter design patterns.
 
-The final patterns and their implementation details will be documented as development progresses.
+Their implementation details will be documented as development progresses.
