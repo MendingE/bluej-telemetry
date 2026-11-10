@@ -34,18 +34,18 @@ public class telemetryPlugin extends Extension implements CompileListener {
         manager.notifyObservers(event);
     }
 
-    public void exportJSON(Path path) throws IOException {
+    public void exportJSON(Path path) {
         var events = store.getAllEvents();
         var payload = new SessionPayload(session.metadata(), events);
         new fileManager(new JSONFormatStrategy()).save(payload, path.toString());
     }
 
-    public void exportPDF(Path path) throws IOException {
+    public void exportPDF(Path path) {
         new fileManager(new reportStrategyPDF()).save(store.getAllEvents(), path.toString());
     }
 
     public void exportFiles(String JSONPath, String PDFPath) {
-        exportJSON(jsonPath);
-        exportPDF(pdfPath);
+        exportJSON(JSONPath);
+        exportPDF(PDFPath);
     }
 }
