@@ -83,9 +83,9 @@ src/
 │   │   ├── dataCollection/
 │   │   ├── events/
 │   │   ├── export/
-│   │   ├── patterns/
 │   │   ├── plugin/
 │   │   └── reporting/
+│   │   
 │   │ 
 │   └── resources/
 └── test/
