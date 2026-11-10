@@ -4,16 +4,15 @@ import bluej.extensions2.event.*;
 import comp3607.telemetry.telemetryPlugin;
 import comp3607.telemetry.events.eventTypes;
 
-
 public class bluejAdapter implements CompileListener, ClassListener, PackageListener, InvocationFinishedListener {
 
-    private telemetryPlugin extension;
+    private final telemetryPlugin extension;
 
     public bluejAdapter(telemetryPlugin e) {
         this.extension = e;
     }
 
- 
+  
     @Override
     public void compileSucceeded(CompileEvent event) {
         extension.recordEvent(eventTypes.COMPILATION_SUCCEEDED, "Compilation has succeeded");
@@ -24,3 +23,73 @@ public class bluejAdapter implements CompileListener, ClassListener, PackageList
         extension.recordEvent(eventTypes.COMPILATION_FAILED, "Compilation has failed");
     }
 
+    @Override
+    public void compileError(CompileEvent event){
+        String errorMsg;
+
+        if(event.getErrorMessage() != null){
+            errorMsg = event.getErrorMessage();
+        }
+        else{
+            errorMsg = "Unknown Error";
+        }
+        int errorLine = event.getErrorLineNumber();
+        extension.recordEvent(eventTypes.COMPILATION_FAILED, "Error at Line " + errorLine + " - Error: " + errorMsg);
+    }
+
+    @Override 
+    public void compileStarted(CompileEvent event) {
+        extension.recordEvent(eventTypes.COMPILATION_STARTED, "Compilation has started");
+    }
+
+    
+    @Override
+    public void compileWarning(CompileEvent event) {
+        extension.recordEvent(eventTypes.COMPILATION_STARTED, "Compilation warning");
+    }
+
+    
+    @Override
+    public void classStateChanged(ClassEvent event) {
+        extension.recordEvent(eventTypes.CLASS_MODIFIED, "Class modified: " + event.getBClass().getName());
+    }
+
+    @Override
+    public void classNameChanged(ClassEvent event) {
+        extension.recordEvent(eventTypes.CLASS_MODIFIED, "Class renamed: " + event.getBClass().getName());
+    }
+
+    @Override
+    public void classRemoved(ClassEvent event) {
+        extension.recordEvent(eventTypes.CLASS_DELETED, "Class deleted: " + event.getBClass().getName());
+    }
+
+   
+    @Override
+    public void packageOpened(PackageEvent event) {
+        try {
+            extension.recordEvent(eventTypes.PROJECT_OPENED, "Project opened: " + event.getPackage().getName());
+        } catch (Exception e) {
+            extension.recordEvent(eventTypes.PROJECT_OPENED, "Project opened (Name unavailable)");
+        }
+    }
+    
+    @Override
+    public void packageClosing(PackageEvent event) {
+        try {
+            extension.recordEvent(eventTypes.PROJECT_CLOSED, "Project closed: " + event.getPackage().getName());
+        } catch (Exception e) {
+            extension.recordEvent(eventTypes.PROJECT_CLOSED, "Project closed (Name unavailable)");
+        }
+    }
+
+    @Override
+    public void invocationFinished(InvocationFinishedEvent event) {
+        if (event.getEventType() == InvocationFinishedEvent.EventType.NORMAL_EXIT) {
+         extension.recordEvent(eventTypes.PROGRAM_EXECUTED, "Method executed successfully");
+        }
+        else if (event.getEventType() == InvocationFinishedEvent.EventType.EXCEPTION_EXIT) {
+            extension.recordEvent(eventTypes.RUNTIME_EXCEPTION, "Method threw an exception");
+        }
+    }
+}
