@@ -8,9 +8,15 @@ import java.util.Map;
 
 public class ReportAggregator {
     private final List<eventTelemetry> events;
+    private final ActivityTimeCalculator activityCalculator; // js
 
     public ReportAggregator(List<eventTelemetry> events) {
         this.events = events;
+        this.activityCalculator = new ActivityTimeCalculator(events); // js
+    }
+
+    public long calculateActiveTimeMs() { // js
+        return activityCalculator.calculateActiveTimeMs();
     }
 
     public long calculateTotalSessionTimeMs() {
@@ -48,4 +54,5 @@ public class ReportAggregator {
     public long getClassCreationCount() {
         return events.stream().filter(e -> e.getType().equals(eventTypes.CLASS_CREATED.name())).count();
     }
+
 }
