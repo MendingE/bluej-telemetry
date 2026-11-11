@@ -7,6 +7,8 @@ public class fileManager {
     private final fileFormatStrategy strategy;
 
     public fileManager(fileFormatStrategy strategy) {
+        if (strategy == null)
+            throw new IllegalArgumentException("strategy cannot be null");
         this.strategy = strategy;
     }
 

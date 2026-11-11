@@ -2,15 +2,13 @@ package comp3607.telemetry.reporting;
 
 import comp3607.telemetry.events.eventTelemetry;
 import comp3607.telemetry.events.eventTypes;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ReportAggregator {
     private final List<eventTelemetry> events;
 
     public ReportAggregator(List<eventTelemetry> events) {
-        this.events = events;
+        this.events = events == null ? List.of() : events;
     }
 
     public long calculateTotalSessionTimeMs() {
@@ -20,11 +18,15 @@ public class ReportAggregator {
     }
 
     public long getCompileSuccessCount() {
-        return events.stream().filter(e -> e.getType().equals(eventTypes.COMPILATION_SUCCEEDED.name())).count();
+        return events.stream()
+                .filter(e -> e.getTypeEnum() == eventTypes.COMPILATION_SUCCEEDED)
+                .count();
     }
 
     public long getCompileFailureCount() {
-        return events.stream().filter(e -> e.getType().equals(eventTypes.COMPILATION_FAILED.name())).count();
+        return events.stream()
+                .filter(e -> e.getTypeEnum() == eventTypes.COMPILATION_FAILED)
+                .count();
     }
 
     public double getCompileSuccessRate() {
@@ -35,9 +37,9 @@ public class ReportAggregator {
     }
 
     public Map<String, Integer> getCompileErrorFrequency() {
-        Map<String, Integer> frequency = new HashMap<>();
+        Map<String, Integer> frequency = new LinkedHashMap<>();
         for (eventTelemetry e : events) {
-            if (e.getType().equals(eventTypes.COMPILATION_FAILED.name())) {
+            if (e.getTypeEnum() == eventTypes.COMPILATION_FAILED) {
                 String error = e.getDetails();
                 frequency.put(error, frequency.getOrDefault(error, 0) + 1);
             }
@@ -46,6 +48,40 @@ public class ReportAggregator {
     }
 
     public long getClassCreationCount() {
-        return events.stream().filter(e -> e.getType().equals(eventTypes.CLASS_CREATED.name())).count();
+        return events.stream()
+                .filter(e -> e.getTypeEnum() == eventTypes.CLASS_CREATED)
+                .count();
+    }
+
+    public List<String> getClassCreationTimeline() {
+        List<String> timeline = new ArrayList<>();
+        for (eventTelemetry e : events) {
+            if (e.getTypeEnum() == eventTypes.CLASS_CREATED) {
+                timeline.add(e.getTimestampStr() + " — " + e.getDetails());
+            }
+        }
+        return timeline;
+    }
+
+    public long calculateActiveTimeMs() {
+        long active = 0;
+        long lastActivityTs = -1;
+        for (eventTelemetry e : events) {
+            if (e.getTypeEnum() == eventTypes.EDITOR_TYPED) {
+                if (lastActivityTs >= 0) {
+                    active += Math.min(e.getTimestampMs() - lastActivityTs, 60_000);
+                }
+                lastActivityTs = e.getTimestampMs();
+            } else if (e.getTypeEnum() == eventTypes.EDITOR_IDLE) {
+                lastActivityTs = -1;
+            }
+        }
+        return active;
+    }
+
+    public long calculateIdleTimeMs() {
+        long total = calculateTotalSessionTimeMs();
+        long active = calculateActiveTimeMs();
+        return Math.max(0, total - active);
     }
 }

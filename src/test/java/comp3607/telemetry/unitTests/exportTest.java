@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import comp3607.telemetry.events.eventTelemetry;
 import comp3607.telemetry.events.eventTypes;
 import comp3607.telemetry.export.JSONFormatStrategy;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -29,25 +28,26 @@ class ExportTest {
 
         JSONFormatStrategy strategy = new JSONFormatStrategy();
         String filePath = tempDir.resolve("test_telemetry.json").toString();
-
         strategy.generateFile(mockEvents, filePath);
 
         File generatedFile = new File(filePath);
-        assertTrue(generatedFile.exists(), "The JSON file should be created");
+        assertTrue(generatedFile.exists());
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(generatedFile);
+        JsonNode root = mapper.readTree(generatedFile);
 
-        assertTrue(rootNode.has("sessionMetadata"), "Root should contain sessionMetadata");
-        JsonNode metadata = rootNode.get("sessionMetadata");
-
-        assertEquals("816000000", metadata.get("studentId").asText());
+        assertTrue(root.has("sessionMetadata"));
+        JsonNode metadata = root.get("sessionMetadata");
+        assertEquals(JSONFormatStrategy.STUDENT_ID_PLACEHOLDER,
+                metadata.get("studentId").asText());
         assertEquals(2, metadata.get("totalCompileAttempts").asInt());
+        assertEquals(0.5, metadata.get("compileSuccessRate").asDouble(), 0.001);
+        assertTrue(metadata.has("totalActiveTimeSec"));
+        assertTrue(metadata.has("totalIdleTimeSec"));
 
-        assertTrue(rootNode.has("events"), "Root should contain events array");
-        JsonNode eventsArray = rootNode.get("events");
-
-        assertEquals(2, eventsArray.size(), "There should be exactly 2 events");
+        assertTrue(root.has("events"));
+        JsonNode eventsArray = root.get("events");
+        assertEquals(2, eventsArray.size());
         assertEquals("COMPILATION_SUCCEEDED", eventsArray.get(0).get("type").asText());
         assertEquals("Compile OK", eventsArray.get(0).get("details").asText());
     }
@@ -55,19 +55,16 @@ class ExportTest {
     @Test
     void testJSONExportHandlesEmptyEventsList() throws Exception {
         List<eventTelemetry> emptyEvents = new ArrayList<>();
-
         JSONFormatStrategy strategy = new JSONFormatStrategy();
         String filePath = tempDir.resolve("empty_telemetry.json").toString();
-
         strategy.generateFile(emptyEvents, filePath);
 
         File generatedFile = new File(filePath);
         assertTrue(generatedFile.exists());
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(generatedFile);
-
-        assertEquals(0, rootNode.get("sessionMetadata").get("totalCompileAttempts").asInt());
-        assertEquals(0, rootNode.get("events").size());
+        JsonNode root = mapper.readTree(generatedFile);
+        assertEquals(0, root.get("sessionMetadata").get("totalCompileAttempts").asInt());
+        assertEquals(0, root.get("events").size());
     }
 }

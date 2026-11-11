@@ -1,19 +1,27 @@
 package comp3607.telemetry.events;
 
 public class eventTelemetry {
-    private String type;
-    private String details;
-    private long timestampMs;
-    private String timestampStr;
+    private final eventTypes type;
+    private final String details;
+    private final long timestampMs;
+    private final String timestampStr;
 
     public eventTelemetry(eventTypes type, String details) {
-        this.type = type.name();
+        this(type, details, System.currentTimeMillis());
+    }
+
+    public eventTelemetry(eventTypes type, String details, long timestampMs) {
+        this.type = type;
         this.details = details;
-        this.timestampMs = System.currentTimeMillis();
+        this.timestampMs = timestampMs;
         this.timestampStr = java.time.Instant.ofEpochMilli(timestampMs).toString();
     }
 
     public String getType() {
+        return type.name();
+    }
+
+    public eventTypes getTypeEnum() {
         return type;
     }
 
@@ -21,7 +29,6 @@ public class eventTelemetry {
         return details;
     }
 
-    
     public long getTimestampMs() {
         return timestampMs;
     }
