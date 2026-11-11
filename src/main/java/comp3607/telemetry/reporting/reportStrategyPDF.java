@@ -1,14 +1,13 @@
 package comp3607.telemetry.reporting;
 
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.properties.UnitValue;
+import com.lowagie.text.Document;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import comp3607.telemetry.events.eventTelemetry;
 import comp3607.telemetry.export.fileFormatStrategy;
 
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -16,19 +15,21 @@ public class reportStrategyPDF implements fileFormatStrategy {
 
     @Override
     public void generateFile(List<eventTelemetry> events, String filePath) {
+        Document document = new Document();
+
         try {
-            PdfWriter writer = new PdfWriter(filePath);
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
+            PdfWriter.getInstance(document, new FileOutputStream(filePath));
+            document.open();
 
             ReportAggregator agg = new ReportAggregator(events);
 
-            // Title
-            document.add(new Paragraph("BlueJ Telemetry Report")
-                    .setBold().setFontSize(20));
+            Paragraph title = new Paragraph("BlueJ Telemetry Report");
+            title.getFont().setSize(20);
+            title.getFont().setStyle(com.lowagie.text.Font.BOLD);
+            document.add(title);
+            document.add(new Paragraph("\n"));
 
-            // Session Summary
-            document.add(new Paragraph("\nSession Summary:").setBold());
+            document.add(new Paragraph("Session Summary:"));
             document.add(new Paragraph(
                     "Total Session Duration: " + (agg.calculateTotalSessionTimeMs() / 1000) + " seconds"));
             document.add(new Paragraph(
@@ -36,17 +37,19 @@ public class reportStrategyPDF implements fileFormatStrategy {
             document.add(
                     new Paragraph(String.format("Compile Success Rate: %.2f%%", agg.getCompileSuccessRate() * 100)));
             document.add(new Paragraph("Total Classes Created: " + agg.getClassCreationCount()));
+            document.add(new Paragraph("\n"));
 
-            // Compilation Error Breakdown Table
-            document.add(new Paragraph("\nCompilation Error Breakdown:").setBold());
+            document.add(new Paragraph("Compilation Error Breakdown:"));
             Map<String, Integer> errors = agg.getCompileErrorFrequency();
 
             if (errors.isEmpty()) {
                 document.add(new Paragraph("No compilation errors encountered."));
             } else {
-                Table table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
-                table.addHeaderCell("Error Message");
-                table.addHeaderCell("Frequency");
+                PdfPTable table = new PdfPTable(2); // 2 columns
+                table.setWidthPercentage(100);
+
+                table.addCell("Error Message");
+                table.addCell("Frequency");
 
                 for (Map.Entry<String, Integer> entry : errors.entrySet()) {
                     table.addCell(entry.getKey());
@@ -55,10 +58,13 @@ public class reportStrategyPDF implements fileFormatStrategy {
                 document.add(table);
             }
 
-            document.close();
             System.out.println("PDF Report saved to " + filePath);
         } catch (Exception e) {
             System.out.println("Error saving PDF: " + e.getMessage());
+        } finally {
+            if (document.isOpen()) {
+                document.close();
+            }
         }
     }
 }

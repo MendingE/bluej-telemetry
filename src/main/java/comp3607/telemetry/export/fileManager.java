@@ -4,7 +4,7 @@ import comp3607.telemetry.events.eventTelemetry;
 import java.util.List;
 
 public class fileManager {
-    private fileFormatStrategy strategy;
+    private final fileFormatStrategy strategy;
 
     public fileManager(fileFormatStrategy strategy) {
         this.strategy = strategy;
