@@ -10,7 +10,10 @@ public class storeTelemetryData implements Consumer<eventTelemetry> {
 
     @Override
     public void accept(eventTelemetry event) {
-        savedEvents.add(event); 
+        
+        if(event != null){
+            savedEvents.add(event); 
+        }
     }
 
     public List<eventTelemetry> getAllEvents() { 

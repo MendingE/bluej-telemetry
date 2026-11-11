@@ -52,7 +52,7 @@ public class bluejAdapter implements CompileListener, ClassListener, PackageList
     
     @Override
     public void compileWarning(CompileEvent event) {
-        extension.recordEvent(eventTypes.COMPILATION_STARTED, "Compilation warning");
+        extension.recordEvent(eventTypes.COMPILATION_WARNING, "Compilation warning");
     }
 
     

@@ -1,5 +1,8 @@
 package comp3607.telemetry.events;
 
+
+import java.time.Instant;
+
 public class eventTelemetry {
     private String type;
     private String details;
@@ -8,11 +11,19 @@ public class eventTelemetry {
     public eventTelemetry(eventTypes type, String details) {
         this.type = type.name();
         this.details = details;
-        this.timestamp = "TODO: Add timestamp logic";
+        this.timestamp = Instant.now().toString();
     }
 
-    public String getType() { return type; }
-    public String getDetails() { return details; }
-    public String getTimestamp() { return timestamp; }
+    public String getType() { 
+        return type;
+     }
+
+    public String getDetails() { 
+        return details; 
+    }
+
+    public String getTimestamp() { 
+        return timestamp;
+     }
 }
 
