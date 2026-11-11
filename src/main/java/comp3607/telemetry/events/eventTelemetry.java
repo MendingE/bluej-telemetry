@@ -13,10 +13,6 @@ public class eventTelemetry {
         this.timestampStr = java.time.Instant.ofEpochMilli(timestampMs).toString();
     }
 
-    public long getTimestampMs() {
-        return Instant.parse(this.timestamp).toEpochMilli();
-    }
-
     public String getType() {
         return type;
     }
