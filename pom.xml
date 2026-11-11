@@ -25,8 +25,8 @@
 
         <!-- BlueJ Extension API -->
         <dependency>
-            <groupId>org.bluej</groupId>
-            <artifactId>bluej</artifactId>
+            <groupId>bluej</groupId>
+            <artifactId>bluejext2</artifactId>
             <version>6.0.1</version>
             <scope>provided</scope>
         </dependency>
