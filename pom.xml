@@ -25,7 +25,7 @@
 
     <dependencies>
 
-        <!-- BlueJ Extension API -->
+       
         <dependency>
             <groupId>org.bluej</groupId>
             <artifactId>bluej</artifactId>
@@ -33,29 +33,23 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSON processing -->
+        
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- PDF report generation -->
+        
         <dependency>
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
             <version>${openpdf.version}</version>
         </dependency>
 
-        <!-- iText 7 for PDF generation -->
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>itext7-core</artifactId>
-            <version>7.2.5</version>
-            <type>pom</type>
-        </dependency>
+        
+        
 
-        <!-- Unit testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -68,7 +62,7 @@
     <build>
         <plugins>
 
-            <!-- Java compiler -->
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -78,14 +72,14 @@
                 </configuration>
             </plugin>
 
-            <!-- Run JUnit 5 tests -->
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.3</version>
             </plugin>
 
-            <!-- Measure test coverage -->
+            
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -105,6 +99,46 @@
                     </execution>
                 </executions>
             </plugin>
+
+
+
+            <!-- Package the extension and its runtime dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>comp3607.telemetry.plugin.bluejTelemetryExtension</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
 
         </plugins>
     </build>
