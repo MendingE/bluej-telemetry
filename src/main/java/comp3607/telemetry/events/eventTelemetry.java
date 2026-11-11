@@ -21,7 +21,7 @@ public class eventTelemetry {
         return details;
     }
 
-    // These two methods fix the error!
+    
     public long getTimestampMs() {
         return timestampMs;
     }
