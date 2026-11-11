@@ -45,6 +45,14 @@
             <version>${openpdf.version}</version>
         </dependency>
 
+        <!-- iText 7 for PDF generation -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext7-core</artifactId>
+            <version>7.2.5</version>
+            <type>pom</type>
+        </dependency>
+
         <!-- Unit testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
