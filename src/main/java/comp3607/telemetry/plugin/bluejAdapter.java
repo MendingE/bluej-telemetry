@@ -1,8 +1,15 @@
 package comp3607.telemetry.plugin;
 
-import bluej.extensions2.event.*;
-import comp3607.telemetry.telemetryPlugin;
+import bluej.extensions2.event.ClassEvent;
+import bluej.extensions2.event.ClassListener;
+import bluej.extensions2.event.CompileEvent;
+import bluej.extensions2.event.CompileListener;
+import bluej.extensions2.event.InvocationFinishedEvent;
+import bluej.extensions2.event.InvocationFinishedListener;
+import bluej.extensions2.event.PackageEvent;
+import bluej.extensions2.event.PackageListener;
 import comp3607.telemetry.events.eventTypes;
+import comp3607.telemetry.telemetryPlugin;
 
 public class bluejAdapter implements CompileListener, ClassListener, PackageListener, InvocationFinishedListener {
 
