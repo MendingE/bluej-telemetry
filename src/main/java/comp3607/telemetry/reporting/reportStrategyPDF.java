@@ -1,15 +1,16 @@
 package comp3607.telemetry.reporting;
 
+import java.io.FileOutputStream;
+import java.util.List;
+import java.util.Map;
+
 import com.lowagie.text.Document;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+
 import comp3607.telemetry.events.eventTelemetry;
 import comp3607.telemetry.export.fileFormatStrategy;
-
-import java.io.FileOutputStream;
-import java.util.List;
-import java.util.Map;
 
 public class reportStrategyPDF implements fileFormatStrategy {
 
@@ -21,6 +22,7 @@ public class reportStrategyPDF implements fileFormatStrategy {
             PdfWriter.getInstance(document, new FileOutputStream(filePath));
             document.open();
 
+            ActivityTimeCalculator timeCalc = new ActivityTimeCalculator(events);
             ReportAggregator agg = new ReportAggregator(events);
 
             Paragraph title = new Paragraph("BlueJ Telemetry Report");
@@ -30,13 +32,20 @@ public class reportStrategyPDF implements fileFormatStrategy {
             document.add(new Paragraph("\n"));
 
             document.add(new Paragraph("Session Summary:"));
-            document.add(new Paragraph(
-                    "Total Session Duration: " + (agg.calculateTotalSessionTimeMs() / 1000) + " seconds"));
-            document.add(new Paragraph(
-                    "Total Compile Attempts: " + (agg.getCompileSuccessCount() + agg.getCompileFailureCount())));
-            document.add(
-                    new Paragraph(String.format("Compile Success Rate: %.2f%%", agg.getCompileSuccessRate() * 100)));
+            document.add(new Paragraph("Total Session Duration: " + (agg.calculateTotalSessionTimeMs() / 1000) + " seconds"));
+
+            long activeTimeMs = timeCalc.calculateActiveTimeMs();
+            long totalTimeMs = agg.calculateTotalSessionTimeMs();
+            long idleTimeMs = Math.max(0, totalTimeMs - activeTimeMs);
+            
+            document.add(new Paragraph("Active Coding Time: " + (activeTimeMs / 1000) + " seconds"));
+            document.add(new Paragraph("Idle Time: " + (idleTimeMs / 1000) + " seconds"));
+            document.add(new Paragraph("Total Compile Attempts: " + (agg.getCompileSuccessCount() + agg.getCompileFailureCount())));
+
+            document.add(new Paragraph(String.format("Compile Success Rate: %.2f%%", agg.getCompileSuccessRate() * 100)));
+
             document.add(new Paragraph("Total Classes Created: " + agg.getClassCreationCount()));
+
             document.add(new Paragraph("\n"));
 
             document.add(new Paragraph("Compilation Error Breakdown:"));
