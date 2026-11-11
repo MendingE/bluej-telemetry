@@ -14,6 +14,10 @@ public class eventTelemetry {
         this.timestamp = Instant.now().toString();
     }
 
+    public long getTimestampMs(){
+        return Instant.parse(this.timestamp).toEpochMilli();
+    }
+
     public String getType() { 
         return type;
      }
