@@ -51,6 +51,11 @@ public class telemetryPlugin {
         new fileManager(pdfStrategy).save(allEvents, pdfPath);
     }
 
+    public void clearEvents() {
+        store.clear();
+        recordEvent(eventTypes.SESSION_STARTED, "Data cleared by user. New session started.");
+    }
+
     public java.util.List<eventTelemetry> getAllEvents() {
         return store.getAllEvents();
     }

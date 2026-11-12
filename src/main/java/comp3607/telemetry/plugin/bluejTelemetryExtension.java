@@ -8,12 +8,17 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import bluej.extensions2.BClass;
+import bluej.extensions2.BPackage;
 import bluej.extensions2.BProject;
 import bluej.extensions2.BlueJ;
 import bluej.extensions2.Extension;
+import bluej.extensions2.MenuGenerator;
 import bluej.extensions2.editor.JavaEditor;
 import comp3607.telemetry.events.eventTypes;
 import comp3607.telemetry.telemetryPlugin;
+
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 
 public class bluejTelemetryExtension extends Extension {
 
@@ -37,10 +42,38 @@ public class bluejTelemetryExtension extends Extension {
         bluej.addPackageListener(adapter);
         bluej.addInvocationFinishedListener(adapter);
 
-        plugin.startSession();
+        bluej.setMenuGenerator(new MenuBuilder());
 
+        plugin.startSession();
         beginEditorPolling(bluej);
         beginAutoExport();
+
+        try {
+            Class.forName("com.fasterxml.jackson.databind.ObjectMapper");
+        } catch (ClassNotFoundException e) {
+            System.out.println("CRITICAL ERROR: Jackson is missing from the JAR!");
+        }
+    }
+
+    private class MenuBuilder extends MenuGenerator {
+        @Override
+        public javafx.scene.control.MenuItem getToolsMenuItem(BPackage bp) {
+            Menu telemetryMenu = new Menu("Telemetry");
+
+            MenuItem exportItem = new MenuItem("Export Data Now");
+            exportItem.setOnAction(e -> {
+                exportData();
+            });
+
+            MenuItem clearItem = new MenuItem("Clear Collected Data");
+            clearItem.setOnAction(e -> {
+                plugin.clearEvents();
+            });
+
+            telemetryMenu.getItems().addAll(exportItem, clearItem);
+
+            return telemetryMenu;
+        }
     }
 
     private void beginEditorPolling(BlueJ bluej) {
@@ -55,21 +88,18 @@ public class bluejTelemetryExtension extends Extension {
             public void run() {
                 try {
                     BProject[] projects = bluej.getOpenProjects();
-
                     Set<String> currentProjects = new HashSet<>();
                     for (BProject p : projects) {
                         currentProjects.add(safeProjectName(p));
                     }
                     for (String name : currentProjects) {
                         if (!knownProjects.contains(name)) {
-                            plugin.recordEvent(eventTypes.PROJECT_CREATED,
-                                    "Project created/opened: " + name);
+                            plugin.recordEvent(eventTypes.PROJECT_CREATED, "Project created/opened: " + name);
                         }
                     }
                     for (String name : new HashSet<>(knownProjects)) {
                         if (!currentProjects.contains(name)) {
-                            plugin.recordEvent(eventTypes.PROJECT_DELETED,
-                                    "Project closed/deleted: " + name);
+                            plugin.recordEvent(eventTypes.PROJECT_DELETED, "Project closed/deleted: " + name);
                         }
                     }
                     knownProjects.clear();
@@ -88,9 +118,7 @@ public class bluejTelemetryExtension extends Extension {
                         for (BClass c : classes)
                             currentClasses.add(c.getName());
 
-                        Set<String> known = knownClassesByProject
-                                .computeIfAbsent(projectName, k -> new HashSet<>());
-
+                        Set<String> known = knownClassesByProject.computeIfAbsent(projectName, k -> new HashSet<>());
                         for (String cls : currentClasses) {
                             if (!known.contains(cls)) {
                                 plugin.recordEvent(eventTypes.CLASS_CREATED,
@@ -152,8 +180,7 @@ public class bluejTelemetryExtension extends Extension {
             @Override
             public void run() {
                 if (plugin != null) {
-                    String desktopPath = System.getProperty("user.home")
-                            + java.io.File.separator + "Desktop";
+                    String desktopPath = System.getProperty("user.home") + java.io.File.separator + "Desktop";
                     String jsonPath = desktopPath + java.io.File.separator + "telemetry_data.json";
                     String pdfPath = desktopPath + java.io.File.separator + "telemetry_data.pdf";
                     try {
@@ -169,8 +196,7 @@ public class bluejTelemetryExtension extends Extension {
 
     public void exportData() {
         try {
-            String desktopPath = System.getProperty("user.home")
-                    + java.io.File.separator + "Desktop";
+            String desktopPath = System.getProperty("user.home") + java.io.File.separator + "Desktop";
             String jsonPath = desktopPath + java.io.File.separator + "telemetry_data.json";
             String pdfPath = desktopPath + java.io.File.separator + "telemetry_data.pdf";
             plugin.exportFiles(jsonPath, pdfPath);
@@ -186,7 +212,6 @@ public class bluejTelemetryExtension extends Extension {
             editorTimer.cancel();
         if (exportTimer != null)
             exportTimer.cancel();
-
         if (plugin != null) {
             plugin.endSession();
             exportData();
