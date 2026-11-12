@@ -6,9 +6,15 @@ import java.util.*;
 
 public class ReportAggregator {
     private final List<eventTelemetry> events;
+    private final ActivityTimeCalculator activityCalculator;
 
     public ReportAggregator(List<eventTelemetry> events) {
         this.events = events == null ? List.of() : events;
+        this.activityCalculator = new ActivityTimeCalculator(this.events);
+    }
+
+    public long calculateActiveTimeMs() {
+        return activityCalculator.calculateActiveTimeMs();
     }
 
     public long calculateTotalSessionTimeMs() {
@@ -61,22 +67,6 @@ public class ReportAggregator {
             }
         }
         return timeline;
-    }
-
-    public long calculateActiveTimeMs() {
-        long active = 0;
-        long lastActivityTs = -1;
-        for (eventTelemetry e : events) {
-            if (e.getTypeEnum() == eventTypes.EDITOR_TYPED) {
-                if (lastActivityTs >= 0) {
-                    active += Math.min(e.getTimestampMs() - lastActivityTs, 60_000);
-                }
-                lastActivityTs = e.getTimestampMs();
-            } else if (e.getTypeEnum() == eventTypes.EDITOR_IDLE) {
-                lastActivityTs = -1;
-            }
-        }
-        return active;
     }
 
     public long calculateIdleTimeMs() {
